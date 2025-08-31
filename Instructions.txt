@@ -1,0 +1,41 @@
+But the Multi Agent deep search project code in Python
+
+
+Awesome—here’s a ready-to-run Multi-Agent Deep Search project in Python inspired by that repo’s “DeepSearch” idea. 
+I packaged a small but complete pipeline with Planner → Researcher → Reader → Synthesizer → Critic agents, DuckDuckGo search, robust page extraction (trafilatura), iterative refinement, and clean outputs.
+
+Download the project: 
+
+How to run
+# 1) Unzip and enter the folder
+unzip multi_agent_deep_search.zip -d multi_agent_deep_search
+cd multi_agent_deep_search
+
+# 2) Create a venv and install deps
+python -m venv .venv
+# Windows: .venv\Scripts\activate
+# macOS/Linux:
+source .venv/bin/activate
+pip install -r requirements.txt
+
+# 3) Run a deep search
+python deep_search.py   [const msg= "Compare the environmental impact of electric vs hybrid vs gas cars."
+
+
+What it does:
+
+Requirement Gathering Agent: gather user requirement and handover to Planner Agent
+
+Planner expands your query into focused sub-queries.
+
+Researcher gathers results via web search using (Tavily API)).
+
+Reader fetches pages and extracts readable text + key points.
+
+Synthesizer builds data on keyinsights.
+
+Writer Agent build the report based fetch and searching.
+
+Critic spots gaps and triggers one or more refinement passes (controlled by --depth).
+
+Outputs land in Text format.

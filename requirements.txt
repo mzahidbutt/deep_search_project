@@ -1,0 +1,2 @@
+openai-agents>=0.2.9
+tavily-python>=0.7.11
