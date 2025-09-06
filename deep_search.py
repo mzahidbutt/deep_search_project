@@ -1,5 +1,5 @@
 import os
-#import asyncio
+import asyncio
 from agents import Agent, Runner, AsyncOpenAI, OpenAIChatCompletionsModel, function_tool, ModelSettings, set_tracing_disabled, RunResult
 
 from  dotenv import load_dotenv, find_dotenv
@@ -88,12 +88,23 @@ researcher_agent = Agent(
   ##  tools=[web_search, browse_page],  Temporary Commit
     model=llm_model
 )
+
+synthesizer_prompt = """
+                    You are an expert Synthesis Agent, skilled at analyzing and synthesizing complex research data into organized, 
+                    insightful conclusions. Your task is to process the provided research data on a given topic, 
+                    organize findings into 2-3 key themes, resolve any conflicts between sources,
+                      and provide deep insights with clear reasoning. You do not use other agents or external tools; 
+                      rely solely on the input data and your analytical capabilities.
+                    """	
+  
+#  instructions="""You are an expert at synthesizing information. Take the research data from the conversation history, 
+#                     understand, reason, and synthesize key insights about the topic. Provide deep analysis. 
+#                     Once synthesized, handoff to the Writer Agent."""
+
 # Synthesizer Agent
 synthesizer_agent = Agent(
     name="Synthesizer Agent",
-    instructions="""You are an expert at synthesizing information. Take the research data from the conversation history, 
-                    understand, reason, and synthesize key insights about the topic. Provide deep analysis. 
-                    Once synthesized, handoff to the Writer Agent.""",
+    instructions=synthesizer_prompt,
     model=llm_model
 )
 
@@ -193,37 +204,39 @@ requirement_gatherer = Agent(
    
 #     print("BOT Output:" , result.final_output)
 
-#async def main():
 user_chat: list[dict] = []
-market_keywords = ["market", "analysis", "stocks", "economy", "finance", "investment", "trading", "business", "industry", "trend"]
 
-user_profile = UserProfile(username="Ali", city="Lahore", topic="AI")
+async def main():
 
-while True:
-    user_input = input("Enter your input (or 'exit' to quit): ")
-    if user_input.lower() == 'exit':
-        break
+    market_keywords = ["market", "analysis", "stocks", "economy", "finance", "investment", "trading", "business", "industry", "trend"]
 
-    if user_input.lower() == 'view':
-        print("\nCurrent Chat History:", user_chat)
+    user_profile = UserProfile(username="Ali", city="Lahore", topic="AI")
+
+    while True:
+        user_input = input("Enter your input (or 'exit' to quit): ")
+        if user_input.lower() == 'exit':
+            break
+
+        if user_input.lower() == 'view':
+            print("\nCurrent Chat History:", user_chat)
     
-        user_message = {"role": "user", "content": user_input}
+            user_message = {"role": "user", "content": user_input}
 
         
-        user_chat.append(user_message)
+            user_chat.append(user_message)
     
 
-    is_market_related = any(keyword in user_input.lower() for keyword in market_keywords)
+        is_market_related = any(keyword in user_input.lower() for keyword in market_keywords)
     
-    if is_market_related:
-     #  print("\nInput is related to market analysis. Processing...",user_input)
-       res: RunResult = Runner.run_sync(starting_agent=requirement_gatherer, input=user_input, context=user_profile, max_turns=20)
-       user_chat = res.to_input_list()
-       print("\nAGENT RESPONSE:", res.final_output)
-       break
-    else:
-        print("\nInput is not related to market analysis. Please provide a market-related query.")
+        if is_market_related:          
+        #  print("\nInput is related to market analysis. Processing...",user_input)
+            res: RunResult = await Runner.run(starting_agent=requirement_gatherer, input=user_input, context=user_profile, max_turns=20)
+            user_chat = res.to_input_list()
+            print("\nAGENT RESPONSE:", res.final_output)
+            break
+        else:
+            print("\nInput is not related to market analysis. Please provide a market-related query.")
 
 
-#if __name__ == "__main__":
-#    asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())
